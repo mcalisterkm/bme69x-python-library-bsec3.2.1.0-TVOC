@@ -244,8 +244,11 @@ bsec_library_return_t bsec_set_sample_rate(void *bme, float sample_rate)
     
     /* TVOC is only supported in LP mode */
     /* Use tolerance for floating-point comparison */
-    printf("Sample rate: %.5f, LP rate: %.5f, diff: %.5f\n", sample_rate, BSEC_SAMPLE_RATE_LP, fabs(sample_rate - BSEC_SAMPLE_RATE_LP));
-    if (fabs(sample_rate - BSEC_SAMPLE_RATE_LP) < 0.01f)
+    float sample_rate_diff = fabs(sample_rate - BSEC_SAMPLE_RATE_LP);
+    printf("Sample rate: %.5f, LP rate: %.5f, diff: %.5f, test result: %s\n", 
+           sample_rate, BSEC_SAMPLE_RATE_LP, sample_rate_diff, 
+           (sample_rate_diff < 0.01f) ? "PASS (TVOC enabled)" : "FAIL (TVOC disabled)");
+    if (sample_rate_diff < 0.01f)
     {
         printf("TVOC sensor enabled - adding to subscription (LP mode detected)\n");
         requested_virtual_sensors[13].sensor_id = BSEC_OUTPUT_TVOC_EQUIVALENT;
@@ -543,7 +546,11 @@ void set_tvoc_equivalent_baseline(bool data)
 void tvoc_equivalent_calibration()
 {
     /* Only calibrate in LP mode */
-    if (fabs(current_sample_rate - BSEC_SAMPLE_RATE_LP) < 0.01f)
+    float sample_rate_diff = fabs(current_sample_rate - BSEC_SAMPLE_RATE_LP);
+    printf("[TVOC Calibration] Sample rate: %.5f, LP rate: %.5f, diff: %.5f, test result: %s\n", 
+           current_sample_rate, BSEC_SAMPLE_RATE_LP, sample_rate_diff, 
+           (sample_rate_diff < 0.01f) ? "PASS (LP mode)" : "FAIL (not LP mode)");
+    if (sample_rate_diff < 0.01f)
     {
         if (!tvoc_calibration_started)
         {
